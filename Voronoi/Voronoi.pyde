@@ -6,6 +6,8 @@ NH = 1
 
 iN = 0
 
+choice = 0
+
 
 def setup():
     size(1000, 600, P3D)
@@ -13,13 +15,50 @@ def setup():
     noStroke()
     smooth(8)
     
-    global cells, R, time
+    global cells, R, time, ptList1, ptList2
     
     R = dist(0, 0, W, H) #Maximum radius
     time = 0
     
 def keyPressed():
+    global iN, ptList1, ptList2, cells, choice
     if key == "1":
+        background(255)
+        global time, cells
+        cells = [] #Array list containing cell objects
+        numPts = 6
+        changeAmt = 1
+        change = []
+        for i in range(numPts):
+            change.append((random(-changeAmt, changeAmt), random(-changeAmt, changeAmt)))
+        for i in range(NW+4):
+            for j in range(NH+4):
+                ptList = []
+                
+                if (choice == 0):
+                    p1 = Point(W/(NW+1) * (i-1), H/(NH+1) * (j-1))
+                    ptList.append(p1)
+                    for k in range(numPts-1):
+                        p2 = Point(p1.pos.x + change[k][0], p1.pos.y + change[k][1])
+                        ptList.append(p2)
+                        p1 = p2
+                elif choice == 1:
+                    for k in range(numPts):
+                        p = Point(ptList1[k].pos.x + change[k][0] + W/(NW+1) * (i-1) - W/(NW+1) * (-1), ptList1[k].pos.y + change[k][1]+ H/(NH+1) * (j-1) - H/(NH+1) * (-1))
+                        ptList.append(p)
+                else:
+                    for k in range(numPts):
+                        p = Point(ptList2[k].pos.x + change[k][0] + W/(NW+1) * (i-1) - W/(NW+1) * (-1), ptList2[k].pos.y + change[k][1]+ H/(NH+1) * (j-1) - H/(NH+1) * (-1))
+                        ptList.append(p)
+                cell = Cell(ptList)
+                if i == 0 and j == 0:
+                    ptList1 = ptList
+                cells.append(cell)
+        for c in cells:
+            c.render()
+        iN += 1
+        save("VoronoiCellsV" + str(iN) + "A.png")
+        
         background(255)
         global time, cells
         cells = [] #Array list containing cell objects
@@ -31,20 +70,39 @@ def keyPressed():
         for i in range(NW+4):
             for j in range(NH+4):
                 ptList = []
-                p1 = Point(W/(NW+1) * (i-1), H/(NH+1) * (j-1))
-                ptList.append(p1)
-                for k in range(numPts-1):
-                    p2 = Point(p1.pos.x + change[k][0], p1.pos.y + change[k][1])
-                    ptList.append(p2)
-                    p1 = p2
+                
+                if (choice == 0):
+                    p1 = Point(W/(NW+1) * (i-1), H/(NH+1) * (j-1))
+                    ptList.append(p1)
+                    for k in range(numPts-1):
+                        p2 = Point(p1.pos.x + change[k][0], p1.pos.y + change[k][1])
+                        ptList.append(p2)
+                        p1 = p2
+                elif choice == 1:
+                    for k in range(numPts):
+                        p = Point(ptList1[k].pos.x + change[k][0] + W/(NW+1) * (i-1) - W/(NW+1) * (-1), ptList1[k].pos.y + change[k][1]+ H/(NH+1) * (j-1) - H/(NH+1) * (-1))
+                        ptList.append(p)
+                else:
+                    for k in range(numPts):
+                        p = Point(ptList2[k].pos.x + change[k][0] + W/(NW+1) * (i-1) - W/(NW+1) * (-1), ptList2[k].pos.y + change[k][1]+ H/(NH+1) * (j-1) - H/(NH+1) * (-1))
+                        ptList.append(p)
                 cell = Cell(ptList)
+                if i == 0 and j == 0:
+                    ptList2 = ptList
                 cells.append(cell)
         for c in cells:
             c.render()
-        iN += 1
-        save("VoronoiCells" + str(iN) + ".png")
+        save("VoronoiCellsV" + str(iN) + "B.png")
     elif key == "2":
         edgeDetection()
+    elif key == "3":
+        pass
+    elif key == "a":
+        choice = 1
+        println("A")
+    elif key == "b":
+        choice = 2
+        println("B")
     
 def draw():
     pass
@@ -98,11 +156,11 @@ class Point:
         endShape()
         
         # Drawing point at its center
-        pushStyle()
-        strokeWeight(8)
-        stroke(0)
-        point(0, 0, 0)
-        popStyle()
+        # pushStyle()
+        # strokeWeight(8)
+        # stroke(0)
+        # point(0, 0, 0)
+        # popStyle()
         
         popMatrix()
 
@@ -173,18 +231,18 @@ class Line:
         vertex(self.p2.pos.x, self.p2.pos.y,0)
         endShape()
         
-        pushStyle()
-        strokeWeight(2)
-        stroke(0)
-        line(x1,y1,0,x2,y2,0);
-        popStyle()
+        # pushStyle()
+        # strokeWeight(2)
+        # stroke(0)
+        # line(x1,y1,0,x2,y2,0);
+        # popStyle()
         
         popMatrix()
         
 def edgeDetection():
     h = 1;
     thetas = [0, 90, 45, 135]
-    img = loadImage("VoronoiCells" + str(iN) + ".png")
+    img = loadImage("VoronoiCellsV" + str(iN) + "A.png")
     for x in range(width):
         for y in range(height):
             neighbors = []
@@ -207,52 +265,31 @@ def edgeDetection():
                 set(x,y,color(0))
             else:
                 set(x,y,color(255))
-            # maxDerivX = 0;
-            # maxDerivY = 0;
-      
-            # for i in range(len(thetas)):
-            #     theta = radians(thetas[i])
-                
-            #     x0 = abs(x - h * cos(theta))
-            #     x1 = x + h * cos(theta)
-            #     if (x1 >= width):
-            #         x1 = width - 1
-            #     y0 = abs(y - h * sin(theta))
-            #     y1 = y + h * sin(theta)
-            #     if (y1 >= height):
-            #         y1 = height - 1
-                
-            #     c = get(int(x0), y)
-            #     rX0 = red(c)
-            #     gX0 = green(c)
-            #     bX0 = blue(c)
-            #     cX0 = (rX0 + gX0 + bX0)/3.0
-            #     c = get(int(x1), y)
-            #     rX1 = red(c)
-            #     gX1 = green(c)
-            #     bX1 = blue(c)
-            #     cX1 = (rX1 + gX1 + bX1)/3.0
-            #     c = get(int(x), int(y0))
-            #     rY0 = red(c)
-            #     gY0 = green(c)
-            #     bY0 = blue(c)
-            #     cY0 = (rY0 + gY0 + bY0)/3.0
-            #     c = get(x, int(y1))
-            #     rY1 = red(c)
-            #     gY1 = green(c)
-            #     bY1 = blue(c)
-            #     cY1 = (rY1 + gY1 + bY1)/3.0
-                
-            #     derivX = abs(cX1 - cX0)
-            #     derivY = abs(cY1 - cY0)
-            #     derivX = (derivX + 1)/2.0
-            #     derivY = (derivY + 1)/2.0
-            #     maxDerivX = max(derivX, maxDerivX)
-            #     maxDerivY = max(derivY, maxDerivY)
-            # col = (maxDerivX + maxDerivY)/2.0;
-            # if (col > 0.54):
-            #     col = 0
-            # else:
-            #     col = 1
-            # set(x,y, color(col,col,col))
-    save("Edges" + str(iN) + ".jpg")
+
+    save("EdgesV" + str(iN) + "A.jpg")
+    
+    img = loadImage("VoronoiCellsV" + str(iN) + "B.png")
+    for x in range(width):
+        for y in range(height):
+            neighbors = []
+            if (x > 0 ):
+                neighbors.append(img.get(x-1, y))
+            if (x < width - 1):
+                neighbors.append(img.get(x+1,y))
+            if (y > 0 ):
+                neighbors.append(img.get(x, y-1))
+            if (y < height - 1):
+                neighbors.append(img.get(x,y+1))
+            
+            currCol = img.get(x,y)
+            edge = False
+            for col in neighbors:
+                if red(col) != red(currCol) or green(col) != green(currCol) or blue(col) != blue(currCol):
+                    edge = True
+                    break
+            if edge:
+                set(x,y,color(0))
+            else:
+                set(x,y,color(255))
+
+    save("EdgesV" + str(iN) + "B.jpg")
