@@ -4,13 +4,19 @@ int cols = 10;
 int square;
 float w = 0;
 
+int[] ruleSet;
+
 int frame = 0;
 
 int[][] colors;
+int[][] startColors;
 
 int time = 0;
 
+PrintWriter output;
+
 void setup() {
+  output = createWriter("Rules.txt"); 
   size(800,800);
   stroke(color(random(0,256), random(0,256), random(0,256)));
   //fill(color(random(0,256), random(0,256), random(0,256)));
@@ -18,20 +24,51 @@ void setup() {
   rows = cols;
   noStroke();
   frameRate(5);
-  
+  ruleSet = generateRules();
   colors = new int[cols][rows];
+  startColors = new int[cols][rows];
   for (int i = 0; i < cols; i++) {
      for (int j = 0; j < rows; j++) {
         int randomColor = (int)random(0,4);
         colors[i][j] = randomColor;
+        startColors[i][j] = randomColor;
      }
   }
   drawSquares();
+  
+}
+
+void keyPressed() {
+  output.flush(); // Writes the remaining data to the file
+  output.close(); // Finishes the file
+  exit(); // Stops the program
 }
 
 void draw() {
-  save("Kumiko" + frame + ".jpg");
-  drawSquares(); 
+  for (int i = 0; i < 50; i++) {
+    drawSquares(); 
+  }
+  
+  if (calculateValue()) {
+    save("Kumiko" + frame + ".jpg");
+  
+    String setString = "Version: " + frame + " [";
+    for (int i = 0; i < 11; i++) {
+      setString += ruleSet[i] + " ";
+    }
+    output.println(setString + "]");
+    
+    frame++; 
+  }
+  
+  for (int i = 0; i < cols; i++) {
+     for (int j = 0; j < rows; j++) {
+        colors[i][j] = startColors[i][j];
+        println(startColors[i][j]);
+     }
+  }
+  ruleSet = generateRules();
+  //noLoop();
 }
 
 void drawSquares() {
@@ -76,27 +113,27 @@ int[] getNextCol(int[] prev) {
      
      int val = m;
      if (valL == 0 && valR == 0) {
-        val = m;
+        val += ruleSet[0];
      } else if (valL > 0 && valR > 0) {
-       val = m; 
+       val += ruleSet[1];
      } else if (valL < 0 && valR < 0) {
-       val = m; 
+       val += ruleSet[2];
      } else if (valL == 0 && valR < 0) {
-       val-=2; 
+       val += ruleSet[3];
      } else if (valL > 0 && valR == 0) {
-       val+=2;
+       val += ruleSet[4];
      } else if (valL < 0 && valR == 0) {
-       val-=2; 
+       val += ruleSet[5];
      } else if (valL == 0 && valR > 0) {
-       val+=1;
+       val += ruleSet[6];
      }  else if (valL >= 0 && valR < 0) {
-       val--; 
+       val += ruleSet[7];
      } else if (valL > 0 && valR <= 0) {
-       val++;
+       val += ruleSet[8];
      } else if (valL < 0 && valR >= 0) {
-       val--; 
+       val += ruleSet[9];
      } else if (valL <= 0 && valR > 0) {
-       val++;
+       val += ruleSet[10];
      }
      if (l == 3 && m == 0) {
        val = 3; 
@@ -106,4 +143,52 @@ int[] getNextCol(int[] prev) {
      next[i] = val;
    }
    return next;
+}
+
+int[] generateRules() {
+  int[] rules = new int[11];
+  for (int i = 0; i < 11; i++) {
+    int rule = (int)random(-3,4);
+    rules[i] = rule;
+  }
+  return rules;
+}
+
+boolean calculateValue() {
+  boolean red = false;
+  boolean green = false;
+  boolean black = false;
+  boolean white = false;
+  
+  for (int x = 1; x < width-1; x++) {
+    for (int y = 0; y < height; y++) {
+      color col = get(x,y);
+      float r = red(col);
+      float g = green(col);
+      float b = blue(col);
+      
+      color col0 = get(x-1,y);
+      float r0 = red(col0);
+      float g0 = green(col0);
+      float b0 = blue(col0);
+      
+      color col2 = get(x+1,y);
+      float r2 = red(col2);
+      float g2 = green(col2);
+      float b2 = blue(col2);
+      if (!(r == r0 && r == r2 && g == g0 && g == g2 && b == b0 && b == b2)) {
+         if (r == 255 && g == 0 && b == 0) {
+          red = true; 
+        } else if (r == 0 && g == 255 && b == 0) {
+          green = true; 
+        } else if (r == 0 && g == 0 && b == 0) {
+          black = true; 
+        } else if (r == 255 && g == 255 && b == 255) {
+          white = true; 
+        } 
+      }
+    }
+  }
+  
+  return red && green && black && white;
 }
