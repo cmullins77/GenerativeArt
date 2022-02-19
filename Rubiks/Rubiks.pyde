@@ -400,7 +400,10 @@ def setup():
         doMove(int(random(0,11)))
     print("WS " + str(checkSolve(cube)))    
     renderCube()
-    save("StartCube.jpg")
+    save("Cube" + str(imgNum) + ".jpg")
+    imgNum += 1
+    
+    frameRate(10)
     
     startCube = copyCube(cube)
     print(cube)
@@ -457,40 +460,40 @@ def keyPressed():
     
 def renderCube():
     x = 0
-    y = 0
+    y = 15
     faceCount = 0
     for face in cube:
         for row in face:
-            x = 0
+            x = 15
             if faceCount == 1 or faceCount == 4:
-                x = 300
+                x = 315
             elif faceCount == 2 or faceCount == 5:
-                x = 600
+                x = 615
             for squ in row:
                 if squ == 0:
                     fill(1,1,1)
                 elif squ == 1:
-                    fill(0,0,1)
+                    fill(.2,.24,.61)
                 elif squ == 2:
-                    fill(1,0.5,0)
+                    fill(.73,0.47,.2)
                 elif squ == 3:
-                    fill(0,1,0)
+                    fill(.54,.95,.54)
                 elif squ == 4:
-                    fill(1,0,0)
+                    fill(.7,.2,.2)
                 else:
-                    fill(1,1,0)
-                rect(x,y,100,100)
-                x += 100
-            y += 100
+                    fill(1,.98,.4)
+                rect(x,y,90,90)
+                x += 90
+            y += 90
             
         faceCount+=1
-        x = 0
+        x = 15
         if faceCount == 1 or faceCount == 4:
-            x = 300
+            x = 315
         elif faceCount == 2 or faceCount == 5:
-            x = 600
-        y = 0
+            x = 615
+        y = 15
         if faceCount > 2:
-            y = 300
+            y = 315
         
     

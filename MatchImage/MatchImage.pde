@@ -13,6 +13,8 @@
 PImage startImage = null;
 PImage goalImage = null;
 
+int frame = 0;
+
 void setup() {
    colorMode(RGB, 1.0);
    background(0,0,0);
@@ -23,6 +25,8 @@ void setup() {
 void draw() {
   if (startImage != null && goalImage != null) {
     stepImage();
+    save(frame+".jpg");
+    frame++;
   }
 }
 
