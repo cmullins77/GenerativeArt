@@ -1,5 +1,5 @@
 int rows = 0;
-int cols = 10;
+int cols = (int)random(4, 25);
 
 int triangleSize = 40;
 float w = 0;
@@ -8,7 +8,7 @@ int frame = 0;
 
 int[][] colors;
 
-int time = 0;
+IntList pList = new IntList();
 
 void setup() {
   size(800,800);
@@ -22,28 +22,42 @@ void setup() {
   }
   
   colors = new int[cols][rows];
-  for (int i = 0; i < cols; i++) {
+  for (int j = 0; j < rows; j++) {
+    int randomColor = (int)random(0,4);
+    colors[0][j] = randomColor;
+    //println(j);
+  }
+  for (int i = 1; i < cols; i++) {
      for (int j = 0; j < rows; j++) {
-        int randomColor = (int)random(0,4);
-        colors[i][j] = randomColor;
+        colors[i][j] = 0;
+        //println(i + " " + j);
      }
   }
+  
+  for (int i = 0; i < 7; i++) {
+    pList.append(i); 
+  }
+  pList.shuffle();
+  println(pList);
+  
   drawTriangles();
+  
+  frameRate(random(0.1,15));
+  //frameRate(1)
 }
 
 void draw() {
-  time++;
-  if (time % 10 == 0) {
-     save("Kumiko" + frame + ".jpg");
-     drawTriangles(); 
-     frame++;
-  }
+   save("Kumiko" + frame + ".jpg");
+   drawTriangles(); 
+   frame++;
 }
 
 void drawTriangles() {
    for (int i = 0; i < cols; i++) {
+     //println("Col " + i);
       for (int j = -1; j < rows-1; j++) {
          int currColor = colors[i][j+1];
+         //println("Row: " + j + ", " +currColor);
          
          PVector[] vertices = getTriangleVertices(i,j);
          strokeWeight(6);
@@ -223,18 +237,26 @@ int getNextPattern(int s, int[] nPosits) {
 }
 
 void drawPattern(PVector[] verts, int pattern) {
-  if (pattern == 1) {
+  if (pattern == pList.get(0)) {
+    return;
+  } else if (pattern == pList.get(1)) {
     drawPattern1(verts); 
-  } else if (pattern == 2) {
+  } else if (pattern == pList.get(2)) {
     drawPattern2(verts); 
-  } else if (pattern == 3) {
+  } else if (pattern == pList.get(3)) {
     drawPattern3(verts); 
+  } else if (pattern == pList.get(4)) {
+    drawPattern4(verts);  
+  } else if (pattern == pList.get(5)) {
+    drawPattern5(verts);  
+  } else if (pattern == pList.get(6)) {
+    drawPattern6(verts);  
   }
 }
 
 void drawPattern1(PVector[] verts) {
   strokeWeight(2);
-  float percent = 0.15;
+  float percent = 0.2;
   
   for (int i = 0; i < 3; i++) {
     PVector currP = verts[i];
@@ -282,6 +304,72 @@ void drawPattern3(PVector[] verts) {
   }
 }
 
+void drawPattern4(PVector[] verts) {
+  PVector center = new PVector((verts[0].x+verts[1].x+verts[2].x)/3,(verts[0].y+verts[1].y+verts[2].y)/3); 
+  
+  float percent = 0.3;
+  
+  for (int i = 0; i < 3; i++) {
+    PVector currP = verts[i];
+    PVector prevP = i > 0 ? verts[i-1] : verts[2];
+    PVector nextP = i < 2 ? verts[i+1] : verts[0];
+    
+    strokeWeight(6);
+    
+    PVector p0 = new PVector(prevP.x*percent + currP.x*(1-percent), prevP.y*percent + currP.y*(1-percent));
+    PVector p1 = new PVector(nextP.x*percent + currP.x*(1-percent), nextP.y*percent + currP.y*(1-percent));
+    line(p0.x,p0.y,p1.x,p1.y);
+    
+    strokeWeight(2);
+    
+    PVector p2 = new PVector((p0.x + p1.x)/2, (p0.y + p1.y)/2);
+    line(p2.x, p2.y, center.x, center.y);
+  }
+}
+
+void drawPattern5(PVector[] verts) {
+  PVector center = new PVector((verts[0].x+verts[1].x+verts[2].x)/3,(verts[0].y+verts[1].y+verts[2].y)/3); 
+  
+  float percent = 0.3;
+  
+  for (int i = 0; i < 3; i++) {
+    PVector currP = verts[i];
+    PVector prevP = i > 0 ? verts[i-1] : verts[2];
+    PVector nextP = i < 2 ? verts[i+1] : verts[0];
+    
+    strokeWeight(4);
+    
+    PVector p0 = new PVector(prevP.x*percent + currP.x*(1-percent), prevP.y*percent + currP.y*(1-percent));
+    PVector p1 = new PVector(nextP.x*percent + currP.x*(1-percent), nextP.y*percent + currP.y*(1-percent));
+    line(p0.x,p0.y,p1.x,p1.y);
+    
+
+    line(currP.x, currP.y, center.x, center.y);
+  }
+}
+
+void drawPattern6(PVector[] verts) {
+  strokeWeight(4);
+  for (int i = 0; i < 3; i++) {
+    PVector p = verts[i];
+    PVector prevP = i > 0 ? verts[i-1] : verts[2];
+    PVector nextP = i < 2 ? verts[i+1] : verts[0];
+    
+    PVector midNext = new PVector((p.x + nextP.x)/2, (p.y + nextP.y)/2);
+    PVector midPrev = new PVector((p.x + prevP.x)/2, (p.y + prevP.y)/2);
+    PVector midNextPrev = new PVector((prevP.x + nextP.x)/2, (prevP.y + nextP.y)/2);
+    
+    PVector mid1 = new PVector((p.x + midNext.x + midPrev.x)/3, (p.y + midNext.y + midPrev.y)/3);
+    PVector mid2 = new PVector((midNext.x + nextP.x + midNextPrev.x)/3, (midNext.y + nextP.y + midNextPrev.y)/3);
+    
+    line(p.x, p.y, mid1.x, mid1.y);
+    line(mid1.x, mid1.y, midNext.x, midNext.y);
+    line(midNext.x, midNext.y, mid2.x, mid2.y);
+    line(mid2.x, mid2.y, nextP.x, nextP.y);
+  }
+}
+
+
 int[] getNextCol(int[] prev) {
    int[] next = new int[rows];
    for (int i = 0; i < rows; i++) {
@@ -305,11 +393,11 @@ int[] getNextCol(int[] prev) {
      } else if (valL == 0 && valR < 0) {
        val-=2; 
      } else if (valL > 0 && valR == 0) {
-       val+=2;
+       val+=1;
      } else if (valL < 0 && valR == 0) {
-       val-=2; 
+       val-=1; 
      } else if (valL == 0 && valR > 0) {
-       val+=2;
+       val+=1;
      }  else if (valL >= 0 && valR < 0) {
        val--; 
      } else if (valL > 0 && valR <= 0) {
