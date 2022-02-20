@@ -17,7 +17,7 @@ void setup() {
 }
 
 void draw() {
-  //drawPattern15(points);
+  drawPattern18(points);
   save("Pattern.jpg");
   noLoop(); 
 }
