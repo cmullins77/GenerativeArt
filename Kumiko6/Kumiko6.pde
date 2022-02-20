@@ -1,66 +1,102 @@
 int rows = 0;
-int cols = 15; //(int)random(4, 25);
+int cols = 16;//(int)random(4, 25);
 
 int triangleSize = 40;
 float w = 0;
 
 int frame = 0;
 
-int[] ruleSet = {2, -2, 0, -2, 1, -2, 0, -2, 0, 2, 1};
-int[][] ruleOptions = {{2, -2, 0, -2, 1, -2, 0, -2, 0, 2, 1}, {1, 3, -2, 0, -2, 0, 0, 0, -2, -1, -2}, 
-  {-1, -1, 0, 0, 2, 2, 1, -1, 0, -1, -1},{1, 1, 3, -2, -1, -2, 0, 2, -2, 1, 2}, 
-  {-1, -2, 3, -2, -1, -2, 3, -2, -1, 1, 0}, {-1, -2, 3, -2, 3, 0, -2, 1, 0, 1, -2}, {-1, -2, 0, -1, -1, 3, -2, 3, 0, 1, -1},
-  {2, 0, -1, -2, 2, -1, 2, -1, 1, 1, 0}, {1, 2, 2, -2, 0, -1, -1, -2, 3, 2, 0}, {0, 2, 3, -2, -1, -1, 1, -1, 0, -2, 3}, 
-  {0, 0, 0, 2, 1, -2, -1, -1, -1, -1, 2}, {1, -1, -2, -2, -2, 0, -1, 0, -2, 3, -2}, {-1, 0, -2, 3, 3, 3, 0, 1, -1, -2, 0},
-  {0, 0, 0, 2, 3, -1, 1, -1, 0, -2, 3}, {1, 3, -1, 3, -2, -2, -1, 3, 3, -2, -2}, {-1, -1, 1, -2, -1, -2, 0, 0, -1, 2, 2}};
+int[] ruleSet;
+int[][] ruleOptions;
+
+int[] goodSets = {1, 6, 9, 29, 41, 46, 52, 69, 99, 105, 106};
+int chosenRuleSet = 0;
+
+int numPatterns = 7;
 
 int[][] colors;
+int[][] startColors;
+
+color[] strokeColors;
 
 IntList pList = new IntList();
 
 void setup() {
+  readRuleFile();
   size(800,800);
-  stroke(color(random(0,256), random(0,256), random(0,256)));
-  //fill(color(random(0,256), random(0,256), random(0,256)));
-  stroke(60,30,200);
   w = width/cols;
   triangleSize = (int)(w/cos(radians(30)));
   rows = height/(triangleSize/2) + 2;
   if (rows % 2 != 0) {
      rows++; 
   }
+  automataSetup();
+  
+}
+
+void automataSetup() {
+  stroke(color(random(0,256), random(0,256), random(0,256)));
+  //fill(color(random(0,256), random(0,256), random(0,256)));
+  stroke(60,30,200);
+  
+  strokeColors = new color[8];
+  for (int i = 0; i < 8; i++) {
+    color c = color(256.0*(i/8.0));
+    c = color(60,30,200);
+    strokeColors[i] = c;
+  }
   
   colors = new int[cols][rows];
+  startColors = new int[cols][rows];
   for (int j = 0; j < rows; j++) {
-    int randomColor = (int)random(0,4);
-    colors[0][j] = randomColor;
+    int col = (int)random(-1 * (numPatterns - 1),numPatterns);
+    col = 0;
+    if (j == rows/2) {
+      col = numPatterns - 1; 
+    }    
+    colors[0][j] = col;
+    startColors[0][j] = col;
     //println(j);
   }
   for (int i = 1; i < cols; i++) {
      for (int j = 0; j < rows; j++) {
         colors[i][j] = 0;
+        startColors[i][j] = 0;
         //println(i + " " + j);
      }
   }
-  
-  ruleSet = ruleOptions[15]; //4,6,8,10,11,15
+  //ruleSet = ruleOptions[16]; //4,6,8,10,11,15
   for (int i = 0; i < 7; i++) {
     pList.append(i); 
   }
   //pList.shuffle();
   //println(pList);
   
+  //chosenRuleSet = (int)random(0,goodSets.length);
+  ruleSet = ruleOptions[goodSets[chosenRuleSet]]; 
+  
   drawTriangles();
   
   //frameRate(random(0.1,15));
-  frameRate(7);
+  frameRate(24);
   //frameRate(1)
 }
 
 void draw() {
-  save("Kumiko" + frame + ".jpg");
+  
+  save("Version" + chosenRuleSet + "/Kumiko" + frame + ".jpg");
   drawTriangles(); 
   frame++;
+  
+  if (frame == 120) {
+    frame = 0;
+    chosenRuleSet++;
+    if (chosenRuleSet == goodSets.length) {
+      noLoop(); 
+    } else {
+      automataSetup(); 
+    }
+  }
 }
 
 void drawTriangles() {
@@ -72,6 +108,8 @@ void drawTriangles() {
          
          PVector[] vertices = getTriangleVertices(i,j);
          strokeWeight(6);
+         
+         stroke(strokeColors[currColor]);
          triangle(vertices[0].x,vertices[0].y,vertices[1].x,vertices[1].y,vertices[2].x,vertices[2].y);
          
          drawPattern(vertices, currColor);
@@ -201,73 +239,20 @@ int getNumNeighbors(int[] nPosits) {
   return num;
 }
 
-int getNextPattern(int s, int[] nPosits) {
-  int n = getNumNeighbors(nPosits);
-  
-  int newPattern = s;
-  if (s > 0 && n < s * 2) {
-    newPattern--; 
-  } else if (s > 0 && n > s * 3) {
-    newPattern--; 
-  } else if (s > 0) {
-    newPattern++;
-  } else if (s < 3 && n > s * 2 && n < s * 4) {
-    newPattern = 1; 
-  }
-  //if (s == 0 && n >= 3 && n <= 4) {
-  //   newPattern = 2; 
-  // } else if (s == 0 && n >= 5 && n <= 6) {
-  //   newPattern = 1; 
-  // } else if (s == 1 && n < 5) {
-  //   newPattern = 0; 
-  // } else if (s == 1 && n > 6) {
-  //   newPattern = 0; 
-  // } else if (s == 1) {
-  //   newPattern = 2; 
-  // } else if (s == 2 && n < 2) {
-  //   newPattern = 0;
-  // } else if (s == 2 && n < 4) {
-  //   newPattern = 1;
-  // } else if (s == 2 && n > 7) {
-  //   newPattern = 0; 
-  // } else if (s == 2 && n > 5) {
-  //   newPattern = 1; 
-  // } else if (s == 2) {
-  //   newPattern = 3; 
-  // } else if (s == 3 && n < 2) {
-  //   newPattern = 1; 
-  // } else if (s == 3 && n < 5) {
-  //   newPattern = 2; 
-  // } else if (s == 3 && n > 6) {
-  //   newPattern = 1; 
-  // } else if (s == 3 && n > 4) {
-  //   newPattern = 2; 
-  // }
-   
-   return newPattern;
-}
-
 void drawPattern(PVector[] verts, int pattern) {
+  stroke(strokeColors[pattern]);
   if (pattern == pList.get(0)) {
-    //#stroke(250,250,0);
-    //drawPattern1(verts); 
   } else if (pattern == pList.get(1)) {
-    //stroke(0);
     drawPattern1(verts); 
   } else if (pattern == pList.get(2)) {
-    //stroke(50);
     drawPattern2(verts); 
   } else if (pattern == pList.get(3)) {
-    //stroke(0,0,250);
     drawPattern3(verts); 
   } else if (pattern == pList.get(4)) {
-    //stroke(150);
     drawPattern4(verts);  
   } else if (pattern == pList.get(5)) {
-    //stroke(0,250,0);
     drawPattern5(verts);  
   } else if (pattern == pList.get(6)) {
-    //stroke(250,0,0);
     drawPattern6(verts);  
   }
 }
@@ -312,7 +297,8 @@ void drawPattern3(PVector[] verts) {
   for (int i = 0; i < 3; i++) {
     PVector p = verts[i];
     
-    PVector center2 = new PVector((prevP.x+p.x+center.x)/3,(prevP.y+p.y+center.y)/3); 
+    PVector lCent = new PVector((prevP.x+p.x)/2, (prevP.y+p.y)/2);
+    PVector center2 = new PVector((lCent.x+center.x)/2,(lCent.y+center.y)/2); 
     
     line(p.x,p.y,center.x,center.y);
     line(p.x,p.y,center2.x,center2.y);
@@ -425,12 +411,31 @@ int[] getNextCol(int[] prev) {
      } else if (valL <= 0 && valR > 0) {
        val += ruleSet[10];
      }
-     if (l == 3 && m == 0) {
-       val = 3; 
+     if (l == numPatterns - 1 && m == 0) {
+       val = numPatterns - 1; 
      }
-     val = val > 3 ? 3 : val < 0 ? 0 : val;
+     val = val > numPatterns - 1 ? numPatterns - 1 : val < 0 ? 0 : val;
      
      next[i] = val;
    }
    return next;
+}
+
+void readRuleFile() {
+   String[] lines = loadStrings("Rules.txt");
+   ruleOptions = new int[lines.length][11];
+   
+   int ruleVersion = 0;
+   for (String line : lines) {
+     String[] separatedLine = line.split(":");
+     String[] ruleStrings = separatedLine[1].split(",");
+     int ruleNum = 0;
+     for (String rule : ruleStrings) {
+        ruleOptions[ruleVersion][ruleNum] = Integer.parseInt(rule);
+        ruleNum++;
+     }
+     ruleVersion++;
+   }
+   ruleSet = ruleOptions[goodSets[chosenRuleSet]];
+   println(ruleSet);
 }

@@ -1,5 +1,5 @@
 int rows = 0;
-int cols = 10;
+int cols = 16;
 
 int square;
 float w = 0;
@@ -30,6 +30,10 @@ void setup() {
   for (int i = 0; i < cols; i++) {
      for (int j = 0; j < rows; j++) {
         int randomColor = (int)random(0,4);
+        randomColor = 1;
+        if (j == rows/2) {
+          randomColor = 3; 
+        }
         colors[i][j] = randomColor;
         startColors[i][j] = randomColor;
      }
@@ -45,18 +49,19 @@ void keyPressed() {
 }
 
 void draw() {
-  for (int i = 0; i < 50; i++) {
+  for (int i = 0; i < cols*3; i++) {
     drawSquares(); 
   }
   
   if (calculateValue()) {
     save("Kumiko" + frame + ".jpg");
   
-    String setString = "Version: " + frame + " [";
-    for (int i = 0; i < 11; i++) {
-      setString += ruleSet[i] + " ";
+    String setString = frame + ":";
+    setString += ruleSet[0];
+    for (int i = 1; i < 11; i++) {
+      setString += "," + ruleSet[i];
     }
-    output.println(setString + "]");
+    output.println(setString);
     
     frame++; 
   }

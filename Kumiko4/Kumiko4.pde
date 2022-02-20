@@ -1,24 +1,21 @@
 int rows = 0;
-int cols = 15; //(int)random(4, 25);
+int cols = 8;//(int)random(4, 25);
 
 int triangleSize = 40;
 float w = 0;
 
 int frame = 0;
 
-int[] ruleSet = {2, -2, 0, -2, 1, -2, 0, -2, 0, 2, 1};
-int[][] ruleOptions = {{2, -2, 0, -2, 1, -2, 0, -2, 0, 2, 1}, {1, 3, -2, 0, -2, 0, 0, 0, -2, -1, -2}, 
-  {-1, -1, 0, 0, 2, 2, 1, -1, 0, -1, -1},{1, 1, 3, -2, -1, -2, 0, 2, -2, 1, 2}, 
-  {-1, -2, 3, -2, -1, -2, 3, -2, -1, 1, 0}, {-1, -2, 3, -2, 3, 0, -2, 1, 0, 1, -2}, {-1, -2, 0, -1, -1, 3, -2, 3, 0, 1, -1},
-  {2, 0, -1, -2, 2, -1, 2, -1, 1, 1, 0}, {1, 2, 2, -2, 0, -1, -1, -2, 3, 2, 0}, {0, 2, 3, -2, -1, -1, 1, -1, 0, -2, 3}, 
-  {0, 0, 0, 2, 1, -2, -1, -1, -1, -1, 2}, {1, -1, -2, -2, -2, 0, -1, 0, -2, 3, -2}, {-1, 0, -2, 3, 3, 3, 0, 1, -1, -2, 0},
-  {0, 0, 0, 2, 3, -1, 1, -1, 0, -2, 3}, {1, 3, -1, 3, -2, -2, -1, 3, 3, -2, -2}, {-1, -1, 1, -2, -1, -2, 0, 0, -1, 2, 2}};
+int[] ruleSet;
+int[][] ruleOptions;
 
 int[][] colors;
+int[][] startColors;
 
 IntList pList = new IntList();
 
 void setup() {
+  readRuleFile();
   size(800,800);
   stroke(color(random(0,256), random(0,256), random(0,256)));
   //fill(color(random(0,256), random(0,256), random(0,256)));
@@ -31,19 +28,22 @@ void setup() {
   }
   
   colors = new int[cols][rows];
+  startColors = new int[cols][rows];
   for (int j = 0; j < rows; j++) {
     int randomColor = (int)random(0,4);
     colors[0][j] = randomColor;
+    startColors[0][j] = randomColor;
     //println(j);
   }
   for (int i = 1; i < cols; i++) {
      for (int j = 0; j < rows; j++) {
         colors[i][j] = 0;
+        startColors[i][j] = 0;
         //println(i + " " + j);
      }
   }
   
-  ruleSet = ruleOptions[15]; //4,6,8,10,11,15
+  //ruleSet = ruleOptions[16]; //4,6,8,10,11,15
   for (int i = 0; i < 7; i++) {
     pList.append(i); 
   }
@@ -58,9 +58,24 @@ void setup() {
 }
 
 void draw() {
+  for (int i = 0; i < cols*3; i++) {
+    drawTriangles(); 
+  }
   save("Kumiko" + frame + ".jpg");
   drawTriangles(); 
   frame++;
+  
+  for (int i = 0; i < cols; i++) {
+     for (int j = 0; j < rows; j++) {
+        colors[i][j] = startColors[i][j];
+        println(startColors[i][j]);
+     }
+  }
+  if (frame == ruleOptions.length) {
+    noLoop(); 
+  } else {
+    ruleSet = ruleOptions[frame]; 
+  }
 }
 
 void drawTriangles() {
@@ -433,4 +448,23 @@ int[] getNextCol(int[] prev) {
      next[i] = val;
    }
    return next;
+}
+
+void readRuleFile() {
+   String[] lines = loadStrings("Rules.txt");
+   ruleOptions = new int[lines.length][11];
+   
+   int ruleVersion = 0;
+   for (String line : lines) {
+     String[] separatedLine = line.split(":");
+     String[] ruleStrings = separatedLine[1].split(",");
+     int ruleNum = 0;
+     for (String rule : ruleStrings) {
+        ruleOptions[ruleVersion][ruleNum] = Integer.parseInt(rule);
+        ruleNum++;
+     }
+     ruleVersion++;
+   }
+   ruleSet = ruleOptions[0];
+   println(ruleSet);
 }
