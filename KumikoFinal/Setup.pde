@@ -2,7 +2,12 @@
 *Function that sets up the variables needed for the automata 
 */
 void prepareVariables() {
-  cols = (int)random(4, 25);
+  //cols = (int)rand(rand(4,12,0.5), rand(12,25,2), 1);
+  cols = (int)random(4,25);
+  
+  if (width > 1200) {
+     cols *= 2;
+  }
   
   w = width/(cols*1.0);
   triangleSize = (w/cos(radians(30)));
@@ -13,7 +18,7 @@ void prepareVariables() {
   }
   
   totalPatterns = 20;
-  numPatterns = (int)random(3, totalPatterns + 1);
+  numPatterns = (int)rand(3,totalPatterns+1, 3);
   
   chosenRuleSet = (int)random(0,ruleOptions.length);
   ruleSet = ruleOptions[chosenRuleSet]; 
@@ -30,8 +35,12 @@ void prepareVariables() {
   }
   frameRate(12);
   println(cols + " " + framerate);
-  framesPerSection = (int)random(650,1500);
-  framesPerSection = 100;
+  //framesPerSection = (int)rand(rand(650,1000,.5), rand(1000,1500,2), 1);
+  framesPerSection = (int)rand(rand(250,600,.5), rand(600,1000,2), 1);
+  //framesPerSection = 100;
+  
+  println("Columns: " + cols + " & Rows: " + rows + "\nNum Pattterns: " + numPatterns + 
+  ", Rule Set: " + chosenRuleSet + ", Frame Rate: " + framerate + ", Frames Per: " + framesPerSection);
 }
 
 /*
@@ -50,10 +59,12 @@ void automataSetup() {
   colors = new int[cols][rows];
   for (int j = 0; j < rows; j++) {
     int col = (int)random(-1 * (numPatterns - 1),numPatterns);
-    col = 0;
-    if (j == rows/2) {
-      col = numPatterns - 1; 
-    }    
+    if (!useRandomStart) {
+      col = 0;
+      if (j == rows/2) {
+        col = numPatterns - 1; 
+      }
+    }
     colors[0][j] = col;
   }
   
@@ -70,10 +81,10 @@ void automataSetup() {
   pList.shuffle();
   
   if (showStart) {
-    drawTriangles(); 
+    drawTriangles(true); 
   } else {
     for (int i = 0; i < cols*2; i++) {
-        drawTriangles();
+        drawTriangles(true);
     }
   }
 }

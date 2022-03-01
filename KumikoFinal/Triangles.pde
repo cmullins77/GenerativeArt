@@ -1,7 +1,7 @@
 /*
 *Function that draws the current grid of triangles and the correct patterns and then generates the next column
 */
-void drawTriangles() {
+void drawTriangles(boolean update) {
    for (int i = 0; i < cols; i++) {
       for (int j = -1; j < rows-1; j++) {
          int currColor = colors[i][j+1];
@@ -14,12 +14,27 @@ void drawTriangles() {
          drawPattern(vertices, currColor);
      }
    }
-   int[][] nextIter = new int[cols][rows];
-   for (int i = 1; i < cols; i++) {
-     nextIter[i] = colors[i-1]; 
+   if (update) {
+     int[][] nextIter = new int[cols][rows];
+     for (int i = 1; i < cols; i++) {
+       nextIter[i] = colors[i-1]; 
+     }
+     nextIter[0] = getNextCol(nextIter[1]);
+     colors = nextIter;
    }
-   nextIter[0] = getNextCol(nextIter[1]);
-   colors = nextIter;
+   
+   if (useWood) {
+     for (int x  = 0; x < width; x++) {
+       for (int y = 0; y < height; y++) {
+         if (brightness(get(x,y)) != 0) {
+           set(x,y,woodImg.get(x,y)); 
+         } else {
+           set(x,y, getBackgroundColor(y, animatedSky)); 
+         }
+       }
+     }
+     updateBackground();
+   }
 }
 
 /*
