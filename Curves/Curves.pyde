@@ -23,6 +23,9 @@ class HilbertCurve(FractalCurve):
         println(self.rules)
         self.col = col
         
+        self.generatePointList()
+        self.shiftedPoints = []
+        
     def getStep(self, currStr, num):
         if num == 0:
             return currStr
@@ -36,21 +39,54 @@ class HilbertCurve(FractalCurve):
                 newStr += c
         return self.getStep(newStr, num - 1)
     
-    def render(self):
-        translate(self.startPosition.x, self.startPosition.y)
-        noFill()
-        strokeWeight(2)
-        stroke(self.col)
+    def generatePointList(self):
+        sX = self.startPosition.x
+        sY = self.startPosition.y
+        
+        points = [PVector(sX,sY)]
+        dir = PVector(0,-1)
+        pos = PVector(sX, sY)
         for i in range(len(self.rules)):
             c = self.rules[i]
             if c == 'F':
-                line(0, 0, 0, -self.drawLength)
-                translate(0, -self.drawLength)
-            
+                newX = (self.drawLength) * dir.x + pos.x
+                newY = (self.drawLength) * dir.y + pos.y
+                
+                pos = PVector(newX, newY)
+                points.append(pos)    
             elif c == '+':
-                rotate(radians(-90))
+                dir.rotate(radians(-90))
             elif c == '-':
-                rotate(radians(90))
+                dir.rotate(radians(90))
+        self.points = points
+    def shiftPoints(self, t, maxT):
+        shiftedPoints = []
+        for i in range(0, len(self.points) - maxT):
+            p0Index = floor(t) + i
+            p1Index = p0Index + 1 
+            
+            p0 = self.points[p0Index]
+            p1 = self.points[p1Index]
+            
+            tVal = t - (p0Index-i)
+            
+            newP = PVector(p0.x*(1 - tVal) + p0.x*tVal, p0.y*(1-tVal) + p1.y*tVal)
+            #print(p0.x, p0.y, p1.x, p1.y, newP.x, newP.y)
+            shiftedPoints.append(newP)
+        self.shiftedPoints = shiftedPoints
+        
+    def render(self):
+        noFill()
+        strokeWeight(2)
+        stroke(self.col)
+        
+        if len(self.shiftedPoints) == 0:
+            self.shiftedPoints = self.points
+            
+        for i in range(1, len(self.shiftedPoints)):
+            p0 = self.shiftedPoints[i-1]
+            p1 = self.shiftedPoints[i]
+            line(p0.x, p0.y, p1.x, p1.y)
                 
 class GosperCurve(FractalCurve):
     def __init__(self, areaStart, areaEnd, order, col):
@@ -339,8 +375,19 @@ class PeanoCurve(FractalCurve):
 def setup():
     size(600,600)
     colorMode(RGB, 1.0)
-    fCurve = ReverseSierpinskiCurve(PVector(100,100), PVector(500,500),1, color(1,0.5,0.75))
-    fCurve.render()
+    global fCurve, t
+    t = 0
+    fCurve = HilbertCurve(PVector(100,100), PVector(500,500),5, color(1,0.5,0.75))
+    
+    # fCurve.shiftPoints(t, 1)
+    # fCurve.render()
     
 def draw():
-    pass
+    background(0)
+    global t
+    fCurve.shiftPoints(t, 1)
+    fCurve.render()
+    
+    t += 0.01
+    if t > 1:
+        noLoop()
