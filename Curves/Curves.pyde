@@ -65,14 +65,17 @@ class HilbertCurve(FractalCurve):
             p0Index = floor(t) + i
             p1Index = p0Index + 1 
             
-            p0 = self.points[p0Index]
-            p1 = self.points[p1Index]
-            
-            tVal = t - (p0Index-i)
-            
-            newP = PVector(p0.x*(1 - tVal) + p0.x*tVal, p0.y*(1-tVal) + p1.y*tVal)
-            #print(p0.x, p0.y, p1.x, p1.y, newP.x, newP.y)
-            shiftedPoints.append(newP)
+            if p1Index < len(self.points):
+                p0 = self.points[p0Index]
+                p1 = self.points[p1Index]
+                
+                tVal = t - (p0Index-i)
+                
+                newP = PVector(p0.x*(1 - tVal) + p1.x*tVal, p0.y*(1-tVal) + p1.y*tVal)
+                #print(p0.x, p0.y, p1.x, p1.y, newP.x, newP.y)
+                shiftedPoints.append(newP)
+            else:
+                shiftedPoints.append(self.points[len(self.points) - 1])
         self.shiftedPoints = shiftedPoints
         
     def render(self):
@@ -383,11 +386,14 @@ def setup():
     # fCurve.render()
     
 def draw():
-    background(0)
+    background(0.5)
     global t
-    fCurve.shiftPoints(t, 1)
+    fCurve.shiftPoints(t, 60)
     fCurve.render()
     
-    t += 0.01
-    if t > 1:
+    t += 0.1
+    if t > 60:
         noLoop()
+        
+def keyPressed():
+    noLoop()
