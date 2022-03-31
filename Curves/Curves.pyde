@@ -337,7 +337,7 @@ class SierpinskiSquareCurve(FractalCurve):
                 
 class PeanoCurve(FractalCurve):
     def __init__(self, areaStart, areaEnd, order, col):
-        numAcross = (pow(2,order))
+        numAcross = (pow(2,order))*2
         wid = areaEnd.x - areaStart.x
         hei = areaEnd.y - areaStart.y
         minSize = min(wid, hei)
@@ -378,22 +378,48 @@ class PeanoCurve(FractalCurve):
 def setup():
     size(600,600)
     colorMode(RGB, 1.0)
-    global fCurve, t
+    global fCurve, t, imgNum
+    imgNum = 1
     t = 0
-    fCurve = HilbertCurve(PVector(100,100), PVector(500,500),5, color(1,0.5,0.75))
+    fCurve = HilbertCurve(PVector(100,100), PVector(500,500),5, color(0))
     
     # fCurve.shiftPoints(t, 1)
     # fCurve.render()
     
 def draw():
     background(0.5)
-    global t
-    fCurve.shiftPoints(t, 60)
+    global t, imgNum
+    fCurve.shiftPoints(t, 1)
     fCurve.render()
     
-    t += 0.1
-    if t > 60:
+    t += 0.01
+    save("Shift" + str(imgNum) + ".png")
+    imgNum+=1
+    if t > 1:
         noLoop()
-        
+    
+       
+def mousePressed():
+    global imgNum
+    save(str(imgNum) + ".png")
+    imgNum+=1
+    
 def keyPressed():
-    noLoop()
+    global fCurve, t
+    if key == '1':
+        t = 0
+        fCurve = HilbertCurve(PVector(100,100), PVector(500,500),5, color(0))
+    elif key == '2':
+        t = 0
+        fCurve = GosperCurve(PVector(50,-100), PVector(400,200),4, color(0))
+    elif key == '3':
+        t = 0
+        fCurve = SierpinskiCurve(PVector(100,100), PVector(500,500),3, color(0))
+    elif key == '4':
+        t = 0
+        fCurve = SierpinskiSquareCurve(PVector(100,100), PVector(500,500),3, color(0))
+    elif key == '5':
+        t = 0
+        fCurve = PeanoCurve(PVector(200,200), PVector(500,500),4, color(0))
+    
+    # noLoop()
