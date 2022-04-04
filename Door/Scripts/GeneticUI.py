@@ -155,6 +155,34 @@ class GeneticUI(QtWidgets.QWidget):
         door.parmTuple("WindowGap").set((obj.windowGapX.value, obj.windowGapY.value, obj.windowGapZ.value))
         door.parm("NumberPlanks").set(int(obj.numPlanks.value))
 
+
+        door.parm("ArchShape").set(int(obj.archShape.value))
+        door.parm("DoorwaySizex").set(obj.doorwaySizeX.value)
+        door.parm("NumBricks").set(int(obj.numBricks.value))
+        door.parm("BrickSize").set(obj.brickSize.value)
+        door.parm("BrickBevel").set(obj.brickBevel.value)
+        door.parm("ArchType").set(int(obj.archType.value))
+        door.parmTuple("ScaleBits").set((obj.scaleBitsX.value, obj.scaleBitsY.value))
+        door.parm("FirstSection").set(obj.firstSection.value)
+        door.parm("LastSection").set(obj.lastSection.value)
+        door.parm("NumArchBits").set(int(obj.numArchBits.value))
+        door.parmTuple("ArchBit1").set((obj.archBits11, obj.archBits12, obj.archBits13, obj.archBits14, obj.archBits15, obj.archBits16, obj.archBits17, obj.archBits18))
+        door.parmTuple("ArchBit2").set((obj.archBits21, obj.archBits22, obj.archBits23, obj.archBits24, obj.archBits25, obj.archBits26, obj.archBits27, obj.archBits28))
+        door.parmTuple("ArchBit3").set((obj.archBits31, obj.archBits32, obj.archBits33, obj.archBits34, obj.archBits35, obj.archBits36, obj.archBits37, obj.archBits38))
+        door.parmTuple("ArchBit4").set((obj.archBits41, obj.archBits42, obj.archBits43, obj.archBits44, obj.archBits45, obj.archBits46, obj.archBits47, obj.archBits48))
+        door.parmTuple("ArchBit5").set((obj.archBits51, obj.archBits52, obj.archBits53, obj.archBits54, obj.archBits55, obj.archBits56, obj.archBits57, obj.archBits58))
+        door.parmTuple("ArchBit6").set((obj.archBits61, obj.archBits62, obj.archBits63, obj.archBits64, obj.archBits65, obj.archBits66, obj.archBits67, obj.archBits68))
+        door.parmTuple("ArchBit7").set((obj.archBits71, obj.archBits72, obj.archBits73, obj.archBits74, obj.archBits75, obj.archBits76, obj.archBits77, obj.archBits78))
+        door.parmTuple("ArchBit8").set((obj.archBits81, obj.archBits82, obj.archBits83, obj.archBits84, obj.archBits85, obj.archBits86, obj.archBits87, obj.archBits88))
+        door.parmTuple("ArchBit9").set((obj.archBits91, obj.archBits92, obj.archBits93, obj.archBits94, obj.archBits95, obj.archBits96, obj.archBits97, obj.archBits98))
+        door.parmTuple("ArchBit10").set((obj.archBits101, obj.archBits102, obj.archBits103, obj.archBits104, obj.archBits105, obj.archBits106, obj.archBits107, obj.archBits108))
+        door.parm("UseBits").set(int(obj.useBits.value))
+        door.parm("HasSectionAboveDoor").set(int(obj.hasSectionAboveDoor.value))
+        door.parm("AboveDoorHeight").set(obj.aboveDoorHeight.value)
+        door.parm("SeparatorSize").set(obj.separatorSize.value)
+        door.parm("AboveVersion").set(int(obj.aboveVersion.value))
+        door.parm("NumWindowsTop").set(int(obj.NumWindowsTop.value))
+
         return door
 
 def run():
