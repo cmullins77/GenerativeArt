@@ -6,6 +6,13 @@ from Door import *
 
 import random
 
+IS_TESTING_MODE = True
+NUM_TESTING_TIMES = 60
+TESTING_MUTATION_VALUE = 50
+DOORS_SPREAD = True
+
+SAVE_MODELS = False
+
 class GeneticUI(QtWidgets.QWidget):
     def __init__(self):
         super(GeneticUI,self).__init__()
@@ -30,6 +37,12 @@ class GeneticUI(QtWidgets.QWidget):
 
         self.createRandomOptions()
         self.allSelected = []
+
+        if IS_TESTING_MODE:
+            for i in range(NUM_TESTING_TIMES):
+                print(i)
+                self.option1ButtonClicked()
+            self.displayFinal()
         
     def createNewButtonClicked(self):
         self.createRandomOptions()
@@ -66,7 +79,7 @@ class GeneticUI(QtWidgets.QWidget):
             doorObj = Door(doorGeneList.geneList)
             door = self.makeDoorAsset(self.geo, doorObj)
             transform = self.makeNode(self.geo, "xform", "transform", door)
-            transform.parm("tx").set(i*3)
+            transform.parm("tx").set(i*4)
 
             self.merge.setInput(i, transform)
             currentGeneration.append(doorObj)
@@ -81,12 +94,16 @@ class GeneticUI(QtWidgets.QWidget):
         hou.node('/obj/doors/transform2').destroy()
 
         mutationVal = self.ui.mutation_percent.value()
+
+        if IS_TESTING_MODE:
+            mutationVal = TESTING_MUTATION_VALUE
+
         currentGeneration = []
         for i in range(3):
             doorObj = base.mutate(mutationVal)
             door = self.makeDoorAsset(self.geo, doorObj)
             transform = self.makeNode(self.geo, "xform", "transform", door)
-            transform.parm("tx").set(i*3)
+            transform.parm("tx").set(i*4)
 
             self.merge.setInput(i, transform)
             currentGeneration.append(doorObj)
@@ -95,17 +112,50 @@ class GeneticUI(QtWidgets.QWidget):
     def displayFinal(self):
         x = 0
         y = 0
-        for i in range(len(self.allSelected)):
-            current = self.allSelected[i]
+
+        numToUse = 75
+        colNum = 15
+
+        if DOORS_SPREAD:
+            numToUse = numToUse - colNum
+
+        if len(self.allSelected) < numToUse:
+            numToUse = len(self.allSelected)
+
+        interval = len(self.allSelected)/float(numToUse)
+        for i in range(numToUse):
+            curri = int(interval *  i)
+            if i == numToUse - 1:
+                curri = len(self.allSelected) - 1
+            current = self.allSelected[curri]
 
             door = self.makeDoorAsset(self.geo, current)
             transform = self.makeNode(self.geo, "xform", "transform", door)
-            transform.parm("tx").set(x*4)
-            transform.parm("ty").set(y*10)
+            xPosition = x*2.5
+            yPosition = y*4
+            zMultiplier = 0.75
+            if DOORS_SPREAD:
+                xPosition = x*4.5
+                yPosition = y*7.5
+                zMultiplier = 0
+            transform.parm("tx").set(xPosition)
+            transform.parm("ty").set(yPosition)
+            zBasePos = (y % 2 != 0) * 0.5
+            zAddedPos = (x % 2 == 0) * zMultiplier
+            transform.parm("tz").set(zBasePos + zAddedPos)
 
+            if SAVE_MODELS:
+                cache = self.makeNode(self.geo, "filecache", "filecache", transform)
+                cache.parm("file").set("C:/Users/mulli/Downloads/Doors/Door" + str(i) + ".obj")
+                cache.parm("trange").set("off")
+                cache.parm("execute").pressButton()
+
+                
+            
             self.merge.setInput(i, transform)
+
             x += 1
-            if x % 10 == 0:
+            if x % colNum == 0:
                 y += 1
                 x = 0
 
@@ -160,28 +210,29 @@ class GeneticUI(QtWidgets.QWidget):
         door.parm("DoorwaySizex").set(obj.doorwaySizeX.value)
         door.parm("NumBricks").set(int(obj.numBricks.value))
         door.parm("BrickSize").set(obj.brickSize.value)
-        door.parm("BrickBevel").set(obj.brickBevel.value)
+        door.parm("brickbevel").set(obj.brickBevel.value)
         door.parm("ArchType").set(int(obj.archType.value))
         door.parmTuple("ScaleBits").set((obj.scaleBitsX.value, obj.scaleBitsY.value))
         door.parm("FirstSection").set(obj.firstSection.value)
         door.parm("LastSection").set(obj.lastSection.value)
         door.parm("NumArchBits").set(int(obj.numArchBits.value))
-        door.parmTuple("ArchBit1").set((obj.archBits11, obj.archBits12, obj.archBits13, obj.archBits14, obj.archBits15, obj.archBits16, obj.archBits17, obj.archBits18))
-        door.parmTuple("ArchBit2").set((obj.archBits21, obj.archBits22, obj.archBits23, obj.archBits24, obj.archBits25, obj.archBits26, obj.archBits27, obj.archBits28))
-        door.parmTuple("ArchBit3").set((obj.archBits31, obj.archBits32, obj.archBits33, obj.archBits34, obj.archBits35, obj.archBits36, obj.archBits37, obj.archBits38))
-        door.parmTuple("ArchBit4").set((obj.archBits41, obj.archBits42, obj.archBits43, obj.archBits44, obj.archBits45, obj.archBits46, obj.archBits47, obj.archBits48))
-        door.parmTuple("ArchBit5").set((obj.archBits51, obj.archBits52, obj.archBits53, obj.archBits54, obj.archBits55, obj.archBits56, obj.archBits57, obj.archBits58))
-        door.parmTuple("ArchBit6").set((obj.archBits61, obj.archBits62, obj.archBits63, obj.archBits64, obj.archBits65, obj.archBits66, obj.archBits67, obj.archBits68))
-        door.parmTuple("ArchBit7").set((obj.archBits71, obj.archBits72, obj.archBits73, obj.archBits74, obj.archBits75, obj.archBits76, obj.archBits77, obj.archBits78))
-        door.parmTuple("ArchBit8").set((obj.archBits81, obj.archBits82, obj.archBits83, obj.archBits84, obj.archBits85, obj.archBits86, obj.archBits87, obj.archBits88))
-        door.parmTuple("ArchBit9").set((obj.archBits91, obj.archBits92, obj.archBits93, obj.archBits94, obj.archBits95, obj.archBits96, obj.archBits97, obj.archBits98))
-        door.parmTuple("ArchBit10").set((obj.archBits101, obj.archBits102, obj.archBits103, obj.archBits104, obj.archBits105, obj.archBits106, obj.archBits107, obj.archBits108))
-        door.parm("UseBits").set(int(obj.useBits.value))
-        door.parm("HasSectionAboveDoor").set(int(obj.hasSectionAboveDoor.value))
+        door.parmTuple("ArchBit1").set((obj.archBits11.value, obj.archBits12.value, obj.archBits13.value, obj.archBits14.value, obj.archBits15.value, obj.archBits16.value, obj.archBits17.value, obj.archBits18.value))
+        door.parmTuple("ArchBit2").set((obj.archBits21.value, obj.archBits22.value, obj.archBits23.value, obj.archBits24.value, obj.archBits25.value, obj.archBits26.value, obj.archBits27.value, obj.archBits28.value))
+        door.parmTuple("ArchBit3").set((obj.archBits31.value, obj.archBits32.value, obj.archBits33.value, obj.archBits34.value, obj.archBits35.value, obj.archBits36.value, obj.archBits37.value, obj.archBits38.value))
+        door.parmTuple("ArchBit4").set((obj.archBits41.value, obj.archBits42.value, obj.archBits43.value, obj.archBits44.value, obj.archBits45.value, obj.archBits46.value, obj.archBits47.value, obj.archBits48.value))
+        door.parmTuple("ArchBit5").set((obj.archBits51.value, obj.archBits52.value, obj.archBits53.value, obj.archBits54.value, obj.archBits55.value, obj.archBits56.value, obj.archBits57.value, obj.archBits58.value))
+        door.parmTuple("ArchBit6").set((obj.archBits61.value, obj.archBits62.value, obj.archBits63.value, obj.archBits64.value, obj.archBits65.value, obj.archBits66.value, obj.archBits67.value, obj.archBits68.value))
+        door.parmTuple("ArchBit7").set((obj.archBits71.value, obj.archBits72.value, obj.archBits73.value, obj.archBits74.value, obj.archBits75.value, obj.archBits76.value, obj.archBits77.value, obj.archBits78.value))
+        door.parmTuple("ArchBit8").set((obj.archBits81.value, obj.archBits82.value, obj.archBits83.value, obj.archBits84.value, obj.archBits85.value, obj.archBits86.value, obj.archBits87.value, obj.archBits88.value))
+        door.parmTuple("ArchBit9").set((obj.archBits91.value, obj.archBits92.value, obj.archBits93.value, obj.archBits94.value, obj.archBits95.value, obj.archBits96.value, obj.archBits97.value, obj.archBits98.value))
+        door.parmTuple("ArchBit10").set((obj.archBits101.value, obj.archBits102.value, obj.archBits103.value, obj.archBits104.value, obj.archBits105.value, obj.archBits106.value, obj.archBits107.value, obj.archBits108.value))
+        door.parm("UseBits").set(int(obj.useBits.value) > 0)
+        num = int(obj.hasSectionAboveDoor.value) > 0
+        door.parm("HasSectionAboveDoor").set(num)
         door.parm("AboveDoorHeight").set(obj.aboveDoorHeight.value)
         door.parm("SeparatorSize").set(obj.separatorSize.value)
         door.parm("AboveVersion").set(int(obj.aboveVersion.value))
-        door.parm("NumWindowsTop").set(int(obj.NumWindowsTop.value))
+        door.parm("NumWindowsTop").set(int(obj.numWindows.value))
 
         return door
 

@@ -111,7 +111,7 @@ class Door:
 
         self.totalDoorHeight = Gene(geneList[16], 3, 3.5, 4.5, True)
 
-        self.color_M = Gene(geneList[17], 3, 0, 1, True)
+        self.color_M = Gene(geneList[17], 6, 0, 1, True)
 
         self.firstSectionPercentage = Gene(geneList[18], 3, 0.25, 0.75, True)
 
@@ -122,12 +122,12 @@ class Door:
             self.firstSectionPercentage.value = 1
 
         self.doorSizeX = Gene(geneList[21], 3, 1.75, 2.25, True)
-        self.doorSizeZ = Gene(geneList[22], 3, 0.1, .2, True)
+        self.doorSizeZ = Gene(geneList[22], 3, 0.2, .5, True)
 
         self.numPanels = Gene(geneList[23], 4, 1, 4, False)
 
         self.panelGrooveSizeX = Gene(geneList[24], 3, 0.005, 0.055, True)
-        self.panelGrooveSizeY = Gene(geneList[25], 3, 0, .9, True)
+        self.panelGrooveSizeY = Gene(geneList[25], 3, .5, .9, True)
 
         self.stileWidth = Gene(geneList[26], 3, 0.015, .2, True)
 
@@ -284,9 +284,9 @@ class Door:
         self.archBits108 = Gene(geneList[69][7], 3, 0.01, 0.4, True)
 
 
-        self.useBits = Gene(geneList[70], 2, 0, 1, False)
+        self.useBits = Gene(geneList[70], 6, 0, 5, False)
 
-        self.hasSectionAboveDoor = Gene(geneList[71], 2, 0, 1, False)
+        self.hasSectionAboveDoor = Gene(geneList[71], 5, 0, 4, False)
         self.aboveDoorHeight = Gene(geneList[72], 3, self.doorSizeX.value*0.5, self.doorSizeX.value*1.5, True)
 
         self.separatorSize = Gene(geneList[73], 3, 0.02, 0.14, True)
@@ -364,7 +364,7 @@ class DoorGeneGenerator:
 
         self.totalDoorHeight = random.randint(0,2)
 
-        self.color_M = random.randint(0,2)
+        self.color_M = random.randint(0,5)
 
         self.firstSectionPercentage = random.randint(0,2)
 
@@ -532,10 +532,10 @@ class DoorGeneGenerator:
         self.archBits107 = random.randint(0,2)
         self.archBits108 = random.randint(0,2)
 
+        
+        self.useBits = random.randint(0,5)
 
-        self.useBits = random.randint(0,1)
-
-        self.hasSectionAboveDoor = random.randint(0,1)
+        self.hasSectionAboveDoor = random.randint(0,4)
         self.aboveDoorHeight = random.randint(0,2)
 
         self.separatorSize = random.randint(0,2)
