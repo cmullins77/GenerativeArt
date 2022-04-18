@@ -10,6 +10,7 @@ IS_TESTING_MODE = True
 NUM_TESTING_TIMES = 60
 TESTING_MUTATION_VALUE = 50
 DOORS_SPREAD = True
+ONE_LINE = False
 
 SAVE_MODELS = False
 
@@ -28,12 +29,23 @@ class GeneticUI(QtWidgets.QWidget):
 
         if hou.node('/obj/doors'):
             hou.node('/obj/doors').destroy()
+            
 
         self.obj = hou.node('/obj')
         self.geo = self.obj.createNode('geo', 'doors')
         self.merge = self.makeNode(self.geo, "merge", "merge")
-        self.merge.setDisplayFlag(True)
-        self.merge.setRenderFlag(True)
+
+        if hou.node('/obj/render') == None:
+            self.makeNode(self.obj, "camera", "render")
+
+        self.camera = hou.node('/obj/render')
+        self.camera.parmTuple("t").set((3.89724, 3.7918, 64.5335))
+        self.camera.parm("orthowidth").set(17.3302)
+
+        colorNode = self.makeNode(self.geo, "color", "blue", self.merge)
+        colorNode.parmTuple("color").set((0,0,1))
+        colorNode.setDisplayFlag(True)
+        colorNode.setRenderFlag(True)
 
         self.createRandomOptions()
         self.allSelected = []
@@ -110,6 +122,10 @@ class GeneticUI(QtWidgets.QWidget):
         self.currentGeneration = currentGeneration
 
     def displayFinal(self):
+
+        self.camera.parmTuple("t").set((30.9627, 16.9384, 64.5335))
+        self.camera.parm("orthowidth").set(70.6741)
+
         x = 0
         y = 0
 
@@ -121,6 +137,9 @@ class GeneticUI(QtWidgets.QWidget):
 
         if len(self.allSelected) < numToUse:
             numToUse = len(self.allSelected)
+
+        if ONE_LINE:
+            numToUse = colNum
 
         interval = len(self.allSelected)/float(numToUse)
         for i in range(numToUse):
@@ -136,7 +155,7 @@ class GeneticUI(QtWidgets.QWidget):
             zMultiplier = 0.75
             if DOORS_SPREAD:
                 xPosition = x*4.5
-                yPosition = y*7.5
+                yPosition = y*8
                 zMultiplier = 0
             transform.parm("tx").set(xPosition)
             transform.parm("ty").set(yPosition)
@@ -150,7 +169,8 @@ class GeneticUI(QtWidgets.QWidget):
                 cache.parm("trange").set("off")
                 cache.parm("execute").pressButton()
 
-                
+            if i == numToUse - 1 and ONE_LINE:
+                transform.parm("tx").set(xPosition*5)
             
             self.merge.setInput(i, transform)
 
@@ -187,6 +207,7 @@ class GeneticUI(QtWidgets.QWidget):
         door.parm("Color_M").set(obj.color_M.value)
         door.parm("FirstSectionPercentage").set(obj.firstSectionPercentage.value)
         door.parm("FirstSectionType").set(int(obj.firstSectionType.value))
+        door.parm("FirstSectionTypeTwo").set(int(obj.firstSectionType2.value))
         door.parm("SecondSectionType").set(int(obj.secondSectionType.value))
         door.parmTuple("DoorSize").set((obj.doorSizeX.value, 0, obj.doorSizeZ.value))
         door.parm("NumPanels").set(int(obj.numPanels.value))
