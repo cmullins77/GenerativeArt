@@ -6,7 +6,7 @@ from Door import *
 
 import random
 
-IS_TESTING_MODE = True
+IS_TESTING_MODE = False
 NUM_TESTING_TIMES = 60
 TESTING_MUTATION_VALUE = 50
 DOORS_SPREAD = True
@@ -21,11 +21,12 @@ class GeneticUI(QtWidgets.QWidget):
         self.ui = QtUiTools.QUiLoader().load(ui_file, parentWidget=self)
         self.setParent(hou.ui.mainQtWindow(), QtCore.Qt.Window)
         
-        self.ui.generate_new.clicked.connect(self.createNewButtonClicked)
+        # self.ui.generate_new.clicked.connect(self.createNewButtonClicked)
         self.ui.option_1.clicked.connect(self.option1ButtonClicked)
         self.ui.option_2.clicked.connect(self.option2ButtonClicked)
         self.ui.option_3.clicked.connect(self.option3ButtonClicked)
         self.ui.display_final.clicked.connect(self.displayFinal)
+        self.ui.continue_2.clicked.connect(self.continueDoors)
 
         if hou.node('/obj/doors'):
             hou.node('/obj/doors').destroy()
@@ -50,6 +51,8 @@ class GeneticUI(QtWidgets.QWidget):
         self.createRandomOptions()
         self.allSelected = []
 
+        self.isDisplayingAllDoors = False
+
         if IS_TESTING_MODE:
             for i in range(NUM_TESTING_TIMES):
                 print(i)
@@ -60,18 +63,54 @@ class GeneticUI(QtWidgets.QWidget):
         self.createRandomOptions()
 
     def option1ButtonClicked(self):
-        self.selectOption(0)
+        if self.isDisplayingAllDoors:
+            self.selectDisplayOption(1)
+        else:
+            self.selectOption(0)
 
     def option2ButtonClicked(self):
-        self.selectOption(1)
+        if self.isDisplayingAllDoors:
+            self.selectDisplayOption(2)
+        else:
+            self.selectOption(1)
 
     def option3ButtonClicked(self):
-        self.selectOption(2)
+        if self.isDisplayingAllDoors:
+            self.selectDisplayOption(3)
+        else:
+            self.selectOption(2)
+
+    def selectDisplayOption(self, option):
+        print(str(option))
 
     def selectOption(self, option):
         selected = self.currentGeneration[option]
         self.allSelected.append(selected)
         self.generateNew(selected)
+
+    def continueDoors(self):
+        numToUse = 75
+        colNum = 15
+
+        if DOORS_SPREAD:
+            numToUse = numToUse - colNum
+
+        if len(self.allSelected) < numToUse:
+            numToUse = len(self.allSelected)
+
+        hou.node('/obj/doors/Door').destroy()
+        hou.node('/obj/doors/transform').destroy()
+        
+        for i in range(1, numToUse):
+            hou.node('/obj/doors/Door'+str(i)).destroy()
+            hou.node('/obj/doors/transform'+str(i)).destroy()
+
+        self.generateNew(self.allSelected[-1])
+
+        self.camera.parmTuple("t").set((3.89724, 3.7918, 64.5335))
+        self.camera.parm("orthowidth").set(17.3302)
+
+        self.isDisplayingAllDoors = False
     
     def createGeoNode(self, geometryName):
         # Get scene root node
@@ -98,12 +137,13 @@ class GeneticUI(QtWidgets.QWidget):
         self.currentGeneration = currentGeneration
 
     def generateNew(self, base):
-        hou.node('/obj/doors/Door').destroy()
-        hou.node('/obj/doors/Door1').destroy()
-        hou.node('/obj/doors/Door2').destroy()
-        hou.node('/obj/doors/transform').destroy()
-        hou.node('/obj/doors/transform1').destroy()
-        hou.node('/obj/doors/transform2').destroy()
+        if hou.node('/obj/doors/Door'):
+            hou.node('/obj/doors/Door').destroy()
+            hou.node('/obj/doors/Door1').destroy()
+            hou.node('/obj/doors/Door2').destroy()
+            hou.node('/obj/doors/transform').destroy()
+            hou.node('/obj/doors/transform1').destroy()
+            hou.node('/obj/doors/transform2').destroy()
 
         mutationVal = self.ui.mutation_percent.value()
 
@@ -122,6 +162,14 @@ class GeneticUI(QtWidgets.QWidget):
         self.currentGeneration = currentGeneration
 
     def displayFinal(self):
+        hou.node('/obj/doors/Door').destroy()
+        hou.node('/obj/doors/Door1').destroy()
+        hou.node('/obj/doors/Door2').destroy()
+        hou.node('/obj/doors/transform').destroy()
+        hou.node('/obj/doors/transform1').destroy()
+        hou.node('/obj/doors/transform2').destroy()
+
+        self.isDisplayingAllDoors = True
 
         self.camera.parmTuple("t").set((30.9627, 16.9384, 64.5335))
         self.camera.parm("orthowidth").set(70.6741)
