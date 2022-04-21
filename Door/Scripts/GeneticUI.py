@@ -64,19 +64,22 @@ class GeneticUI(QtWidgets.QWidget):
 
     def option1ButtonClicked(self):
         if self.isDisplayingAllDoors:
-            self.selectDisplayOption(1)
+            self.camera.parmTuple("t").set((30.9627, 16.9384, 64.5335))
+            self.camera.parm("orthowidth").set(70.6741)
         else:
             self.selectOption(0)
 
     def option2ButtonClicked(self):
         if self.isDisplayingAllDoors:
-            self.selectDisplayOption(2)
+            self.camera.parmTuple("t").set((123.489, 18.3185, 64.5335))
+            self.camera.parm("orthowidth").set(70.6741)
         else:
             self.selectOption(1)
 
     def option3ButtonClicked(self):
         if self.isDisplayingAllDoors:
-            self.selectDisplayOption(3)
+            self.camera.parmTuple("t").set((211.134, 7.30058, 64.5335))
+            self.camera.parm("orthowidth").set(28.9805)
         else:
             self.selectOption(2)
 
@@ -89,28 +92,15 @@ class GeneticUI(QtWidgets.QWidget):
         self.generateNew(selected)
 
     def continueDoors(self):
-        numToUse = 75
-        colNum = 15
+        if self.isDisplayingAllDoors:
+            hou.node('/obj/doors/door_display').destroy()
 
-        if DOORS_SPREAD:
-            numToUse = numToUse - colNum
+            self.generateNew(self.allSelected[-1])
 
-        if len(self.allSelected) < numToUse:
-            numToUse = len(self.allSelected)
+            self.camera.parmTuple("t").set((3.89724, 3.7918, 64.5335))
+            self.camera.parm("orthowidth").set(17.3302)
 
-        hou.node('/obj/doors/Door').destroy()
-        hou.node('/obj/doors/transform').destroy()
-        
-        for i in range(1, numToUse):
-            hou.node('/obj/doors/Door'+str(i)).destroy()
-            hou.node('/obj/doors/transform'+str(i)).destroy()
-
-        self.generateNew(self.allSelected[-1])
-
-        self.camera.parmTuple("t").set((3.89724, 3.7918, 64.5335))
-        self.camera.parm("orthowidth").set(17.3302)
-
-        self.isDisplayingAllDoors = False
+            self.isDisplayingAllDoors = False
     
     def createGeoNode(self, geometryName):
         # Get scene root node
@@ -162,6 +152,10 @@ class GeneticUI(QtWidgets.QWidget):
         self.currentGeneration = currentGeneration
 
     def displayFinal(self):
+
+        if self.isDisplayingAllDoors:
+            return
+        
         hou.node('/obj/doors/Door').destroy()
         hou.node('/obj/doors/Door1').destroy()
         hou.node('/obj/doors/Door2').destroy()
@@ -189,15 +183,21 @@ class GeneticUI(QtWidgets.QWidget):
         if ONE_LINE:
             numToUse = colNum
 
+        subnet = self.makeNode(self.geo, "subnet", "door_display")
+
+        mergeList = []
+
         interval = len(self.allSelected)/float(numToUse)
+        door = None
+        count = 0
         for i in range(numToUse):
             curri = int(interval *  i)
             if i == numToUse - 1:
                 curri = len(self.allSelected) - 1
             current = self.allSelected[curri]
 
-            door = self.makeDoorAsset(self.geo, current)
-            transform = self.makeNode(self.geo, "xform", "transform", door)
+            door = self.makeDoorAsset(subnet, current)
+            transform = self.makeNode(subnet, "xform", "transform", door)
             xPosition = x*2.5
             yPosition = y*4
             zMultiplier = 0.75
@@ -211,21 +211,83 @@ class GeneticUI(QtWidgets.QWidget):
             zAddedPos = (x % 2 == 0) * zMultiplier
             transform.parm("tz").set(zBasePos + zAddedPos)
 
-            if SAVE_MODELS:
-                cache = self.makeNode(self.geo, "filecache", "filecache", transform)
-                cache.parm("file").set("C:/Users/mulli/Downloads/Doors/Door" + str(i) + ".obj")
-                cache.parm("trange").set("off")
-                cache.parm("execute").pressButton()
-
             if i == numToUse - 1 and ONE_LINE:
                 transform.parm("tx").set(xPosition*5)
             
-            self.merge.setInput(i, transform)
+            mergeList.append(transform)
 
             x += 1
             if x % colNum == 0:
                 y += 1
                 x = 0
+
+            count += 1
+
+        transform = self.makeNode(subnet, "xform", "transform", door)
+        transform.parm("tx").set(110)
+        transform.parm("scale").set(5.36)
+
+        mergeList.append(transform)
+
+        transform = self.makeNode(subnet, "xform", "transform", door)
+        transform.parm("tx").set(126)
+        transform.parm("ry").set(90)
+        transform.parm("scale").set(5.36)
+
+        mergeList.append(transform)
+
+        transform = self.makeNode(subnet, "xform", "transform", door)
+        transform.parm("tx").set(140)
+        transform.parm("ry").set(45)
+        transform.parm("scale").set(5.36)
+
+        mergeList.append(transform)
+
+        count += 3
+
+        x = 0
+        y = 0
+
+        numToUse = 12
+        colNum = 6
+
+        if len(self.allSelected) < numToUse:
+            numToUse = len(self.allSelected)
+
+        interval = len(self.allSelected)/float(numToUse)
+        door = None
+        newcount = 0
+        for i in range(numToUse):
+            curri = int(interval *  i)
+            if i == numToUse - 1:
+                curri = len(self.allSelected) - 1
+            current = self.allSelected[curri]
+
+            door = self.makeDoorAsset(subnet, current)
+            transform = self.makeNode(subnet, "xform", "transform", door)
+            xPosition = x*4.5
+            yPosition = y*8
+            zMultiplier = 0
+            transform.parm("tx").set(xPosition + 200)
+            transform.parm("ty").set(yPosition)
+            zBasePos = (y % 2 != 0) * 0.5
+            zAddedPos = (x % 2 == 0) * zMultiplier
+            transform.parm("tz").set(zBasePos + zAddedPos)
+            
+            mergeList.append(transform)
+
+            x += 1
+            if x % colNum == 0:
+                y += 1
+                x = 0
+
+            newcount += 1
+
+        subMerge = self.makeNode(subnet, "merge", "subMerge", mergeList)
+        subMerge.setDisplayFlag(True)
+        subMerge.setRenderFlag(True)
+
+        self.merge.setInput(0, subnet)
 
 
     def makeNode(self, where, type, name, input = None):
