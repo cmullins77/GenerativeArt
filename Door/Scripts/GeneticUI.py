@@ -6,11 +6,12 @@ from Door import *
 
 import random
 
-IS_TESTING_MODE = False
+IS_TESTING_MODE = True
 NUM_TESTING_TIMES = 60
 TESTING_MUTATION_VALUE = 50
 DOORS_SPREAD = True
 ONE_LINE = False
+USE_BLUE = False
 
 SAVE_MODELS = False
 
@@ -39,25 +40,37 @@ class GeneticUI(QtWidgets.QWidget):
         if hou.node('/obj/render') == None:
             self.makeNode(self.obj, "camera", "render")
 
-        self.camera = hou.node('/obj/render')
+        if USE_BLUE:
+            self.camera = hou.node('/obj/render')
+        else:
+            self.camera = hou.node('/obj/render1')
+
         self.camera.parmTuple("t").set((3.89724, 3.7918, 64.5335))
         self.camera.parm("orthowidth").set(17.3302)
 
-        colorNode = self.makeNode(self.geo, "color", "blue", self.merge)
-        colorNode.parmTuple("color").set((0,0,1))
-        colorNode.setDisplayFlag(True)
-        colorNode.setRenderFlag(True)
+        if USE_BLUE:
+            colorNode = self.makeNode(self.geo, "color", "blue", self.merge)
+            colorNode.parmTuple("color").set((0,0,1))
+            colorNode.setDisplayFlag(True)
+            colorNode.setRenderFlag(True)
+        else:
+            self.merge.setDisplayFlag(True)
+            self.merge.setRenderFlag(True)
 
         self.createRandomOptions()
         self.allSelected = []
 
         self.isDisplayingAllDoors = False
 
+        self.isPreSeed = True
+
         if IS_TESTING_MODE:
             for i in range(NUM_TESTING_TIMES):
                 print(i)
                 self.option1ButtonClicked()
             self.displayFinal()
+        self.isPreSeed = False
+        
         
     def createNewButtonClicked(self):
         self.createRandomOptions()
@@ -137,7 +150,7 @@ class GeneticUI(QtWidgets.QWidget):
 
         mutationVal = self.ui.mutation_percent.value()
 
-        if IS_TESTING_MODE:
+        if IS_TESTING_MODE and self.isPreSeed:
             mutationVal = TESTING_MUTATION_VALUE
 
         currentGeneration = []
