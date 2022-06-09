@@ -9,7 +9,7 @@ I primarily used this to generated wide high res images after quickly iterating 
 
 
 int rows = 0;
-int cols = 300;
+int cols = 600;
 
 int numColors = 10;
 
@@ -35,7 +35,7 @@ int baseGreen = -1;
 int baseBlue = -1;
 boolean randomColors = false;
 void setup() {
-  size(3000,2000);
+  size(3000,2400);
 
   square = (int)(width/(cols-1));
   rows = (int)(height/square) + 1;
